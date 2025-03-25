@@ -23,7 +23,7 @@ public class EmployeeRepository : IRepository<Employee>
         {
             throw new ArgumentNullException(nameof(entity));
         }
-        // we suck this in because we're not longer providing default employees!
+        // we snuck this in because we're not longer providing default employees!
         entity.Id = _employees.Select(e => e.Id).DefaultIfEmpty(0).Max() + 1;
         _employees.Add(entity);
     }
