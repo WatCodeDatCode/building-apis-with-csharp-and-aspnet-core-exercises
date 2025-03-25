@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using TheEmployeeAPI;
 using TheEmployeeAPI.Abstractions;
@@ -12,6 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IRepository<Employee>, EmployeeRepository>(); // Added as singleton because in memory, when working with real DB this will not be the case
 builder.Services.AddProblemDetails();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
@@ -58,18 +60,16 @@ employeeRoute.MapGet("{id:int}", ([FromRoute] int id, [FromServices] IRepository
     });
 });
 
-employeeRoute.MapPost(string.Empty, ([FromBody] CreateEmployeeRequest employeeRequest, [FromServices] IRepository<Employee> repository) => {
-    var validationProblems = new List<ValidationResult>();
-    var isValid = Validator.TryValidateObject(
-        employeeRequest, 
-        new ValidationContext(employeeRequest), 
-        validationProblems, 
-        true
-        );
-
-    if (!isValid)
+employeeRoute.MapPost(string.Empty, 
+    async ([FromBody] CreateEmployeeRequest employeeRequest, 
+    [FromServices] IRepository<Employee> repository,
+    IValidator<CreateEmployeeRequest> validator
+    ) => {
+    
+    var validationResults = await validator.ValidateAsync(employeeRequest);
+    if (!validationResults.IsValid)
     {
-        return Results.BadRequest(validationProblems.ToValidationProblemDetails());
+        return Results.ValidationProblem(validationResults.ToDictionary());
     }
 
     var newEmployee = new Employee {
