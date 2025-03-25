@@ -14,7 +14,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IRepository<Employee>, EmployeeRepository>(); // Added as singleton because in memory, when working with real DB this will not be the case
 builder.Services.AddProblemDetails();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<FluentValidationFilter>();
+});
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
