@@ -36,7 +36,7 @@ public class BasicTests : IClassFixture<WebApplicationFactory<Program>>
     {
         HttpClient client = _factory.CreateClient();
         var response = await client.PostAsJsonAsync("/employees", new Employee { 
-            FirstName = "John", LastName = "Doe" });
+            FirstName = "John", LastName = "Doe", SocialSecurityNumber = "123-55-2123" });
 
         response.EnsureSuccessStatusCode();
     }
@@ -48,5 +48,25 @@ public class BasicTests : IClassFixture<WebApplicationFactory<Program>>
         var response = await client.PostAsJsonAsync("/employees", new{});
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateEmployee_ReturnsOkResult()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.PutAsJsonAsync("/employees/1", new Employee {
+            FirstName = "Bob", LastName = "Brown", SocialSecurityNumber = "124-12-4124"});
+
+            response.EnsureSuccessStatusCode();
+    }
+
+    [Fact]
+    public async Task UpdateEmployee_ReturnsNotFoundResult()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.PutAsJsonAsync("/employees/09999", new Employee {
+            FirstName = "Bob", LastName = "Brown", SocialSecurityNumber = "124-12-4124"});
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }
