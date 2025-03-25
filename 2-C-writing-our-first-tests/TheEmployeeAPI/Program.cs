@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IRepository<Employee>, EmployeeRepository>(); // Added as singleton because in memory, when working with real DB this will not be the case
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
