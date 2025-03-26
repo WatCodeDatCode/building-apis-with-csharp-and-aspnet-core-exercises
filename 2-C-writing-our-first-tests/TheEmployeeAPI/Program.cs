@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TheEmployeeAPI;
 using TheEmployeeAPI.Abstractions;
 using TheEmployeeAPI.Employees;
@@ -50,6 +51,9 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<FluentValidationFilter>();
 });
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddDbContext<AppDbContext>(options => {
+    options.UseSqlite("Data Source=employees.db");
+});
 
 var app = builder.Build();
 

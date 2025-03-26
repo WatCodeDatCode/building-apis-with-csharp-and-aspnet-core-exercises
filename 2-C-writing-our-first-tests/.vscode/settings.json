@@ -1,1 +1,11 @@
-{}
+{
+    "sqltools.useNodeRuntime": true,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "TheEmployeesAPI",
+            "database": "\\\\wsl.localhost\\Ubuntu\\root\\code\\repos\\dotnet\\building-apis-with-csharp-and-aspnet-core-exercises\\2-C-writing-our-first-tests\\TheEmployeeAPI\\employees.db"
+        }
+    ]
+}
