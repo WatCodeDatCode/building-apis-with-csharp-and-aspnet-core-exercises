@@ -11,4 +11,7 @@ public class AppDbContext : DbContext // Inherits from DbContext
 
     public DbSet<Employee> Employees { get; set; } // Property - Collection of Employee entities that are mapped to the Employees table in the database
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+    }
 }

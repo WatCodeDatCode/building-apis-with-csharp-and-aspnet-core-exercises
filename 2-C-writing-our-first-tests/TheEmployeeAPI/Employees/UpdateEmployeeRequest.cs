@@ -1,6 +1,5 @@
 using System;
 using FluentValidation;
-using TheEmployeeAPI.Abstractions;
 
 namespace TheEmployeeAPI.Employees;
 
@@ -15,6 +14,7 @@ public class UpdateEmployeeRequest
     public string? Email { get; set; }
 }
 
+/*
 public class UpdateEmployeeRequestValidator : AbstractValidator<UpdateEmployeeRequest>
 {
     private readonly HttpContext _httpContext;
@@ -46,3 +46,4 @@ public class UpdateEmployeeRequestValidator : AbstractValidator<UpdateEmployeeRe
         return true;
     }
 }
+*/
