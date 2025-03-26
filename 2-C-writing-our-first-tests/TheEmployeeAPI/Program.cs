@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using TheEmployeeAPI;
+using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
         options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     });
+builder.Services.AddSingleton<ISystemClock, SystemClock>();
 
 var app = builder.Build();
 

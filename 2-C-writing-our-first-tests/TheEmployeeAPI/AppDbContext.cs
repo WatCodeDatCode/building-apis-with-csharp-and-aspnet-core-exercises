@@ -1,12 +1,16 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Internal;
 
 namespace TheEmployeeAPI;
 
 public class AppDbContext : DbContext // Inherits from DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) // Constructor for options for configuring the DbContext, usually the dataset
+    private readonly ISystemClock _systemClock;
+
+    public AppDbContext(DbContextOptions<AppDbContext> options, ISystemClock systemClock) : base(options)
     {
+        this._systemClock = systemClock;
     }
 
     public DbSet<Employee> Employees { get; set; } // Property - Collection of Employee entities that are mapped to the Employees table in the database
@@ -16,7 +20,39 @@ public class AppDbContext : DbContext // Inherits from DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<EmployeeBenefit>()
-            .HasIndex(b => new { b.BenefitId, b.EmployeeId})
+            .HasIndex(eb => new { eb.EmployeeId, eb.BenefitId })
             .IsUnique();
+    }
+
+    public override int SaveChanges()
+    {
+        UpdateAuditFields();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        UpdateAuditFields();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void UpdateAuditFields()
+    {
+        var entries = ChangeTracker.Entries<AuditableEntity>();
+
+        foreach (var entry in entries)
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedBy = "TheCreateUser";
+                entry.Entity.CreatedOn = _systemClock.UtcNow.UtcDateTime;
+            }
+
+            if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.LastModifiedBy = "TheUpdateUser";
+                entry.Entity.LastModifiedOn = _systemClock.UtcNow.UtcDateTime;
+            }
+        }
     }
 }
