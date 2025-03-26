@@ -52,7 +52,7 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory>
     public async Task CreateEmployee_ReturnsCreatedResult()
     {
         var client = _factory.CreateClient();
-        var response = await client.PostAsJsonAsync("/employees", new Employee { FirstName = "John", LastName = "Doe" });
+        var response = await client.PostAsJsonAsync("/employees", new Employee { FirstName = "Jan", LastName = "Doe" });
 
         response.EnsureSuccessStatusCode();
     }
@@ -146,7 +146,6 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory>
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
-    /*
     [Fact]
     public async Task GetBenefitsForEmployee_ReturnsOkResult()
     {
@@ -160,5 +159,4 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory>
         var benefits = await response.Content.ReadFromJsonAsync<IEnumerable<GetEmployeeResponseEmployeeBenefit>>();
         Assert.Equal(2, benefits.Count());
     }
-    */
 }
