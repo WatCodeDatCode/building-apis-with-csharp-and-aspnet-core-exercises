@@ -38,7 +38,7 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory>
         var employees = await response.Content.ReadFromJsonAsync<IEnumerable<GetEmployeeResponse>>();
         Assert.Single(employees);
     }
-    
+
     [Fact]
     public async Task GetEmployeeById_ReturnsOkResult()
     {
@@ -48,7 +48,6 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory>
         response.EnsureSuccessStatusCode();
     }
 
-    /*
     [Fact]
     public async Task CreateEmployee_ReturnsCreatedResult()
     {
@@ -79,13 +78,27 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory>
         Assert.Contains("Last name is required.", problemDetails.Errors["LastName"]);
     }
     
+
     [Fact]
     public async Task UpdateEmployee_ReturnsOkResult()
     {
         var client = _factory.CreateClient();
-        var response = await client.PutAsJsonAsync("/employees/1", new Employee { FirstName = "John", LastName = "Doe", Address1 = "123 Main St" });
+        var response = await client.PutAsJsonAsync("/employees/1", new Employee { 
+            FirstName = "John", 
+            LastName = "Doe", 
+            Address1 = "123 Main Smoot" 
+        });
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Fail($"Failed to update employee: {content}");
+        }
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var employee = await db.Employees.FindAsync(1);
+        Assert.Equal("123 Main Smoot", employee.Address1);
     }
 
     [Fact]
@@ -106,6 +119,34 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory>
         Assert.Contains("Address1", problemDetails.Errors.Keys);
     }
 
+    [Fact]
+    public async Task DeleteEmployee_ReturnsNoContentResult()
+    {
+        var client = _factory.CreateClient();
+
+        var newEmployee = new Employee { FirstName = "Meow", LastName = "Garita" };
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.Employees.Add(newEmployee);
+            await db.SaveChangesAsync();
+        }
+
+        var response = await client.DeleteAsync($"/employees/{newEmployee.Id}");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteEmployee_ReturnsNotFoundResult()
+    {
+        var client = _factory.CreateClient();
+        var response = await client.DeleteAsync("/employees/99999");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    /*
     [Fact]
     public async Task GetBenefitsForEmployee_ReturnsOkResult()
     {

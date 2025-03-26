@@ -20,7 +20,10 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    {
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+        options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    });
 
 var app = builder.Build();
 
