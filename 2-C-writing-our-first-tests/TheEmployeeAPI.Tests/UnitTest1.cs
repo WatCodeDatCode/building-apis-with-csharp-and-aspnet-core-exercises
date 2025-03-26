@@ -22,6 +22,11 @@ public class BasicTests : IClassFixture<WebApplicationFactory<Program>>
             FirstName = "John", 
             LastName = "Doe",
             Address1 = "123 Main St",
+            Benefits = new List<EmployeeBenefits>
+            {
+                new EmployeeBenefits { BenefitType = BenefitType.Health, Cost = 100 },
+                new EmployeeBenefits { BenefitType = BenefitType.Dental, Cost = 50 }
+            }
         };
         repo.Create(employee);
         _employeeId = repo.GetAll().First().Id;
@@ -100,5 +105,19 @@ public class BasicTests : IClassFixture<WebApplicationFactory<Program>>
         var problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         Assert.NotNull(problemDetails);
         Assert.Contains("Address1", problemDetails.Errors.Keys);
+    }
+
+    [Fact]
+    public async Task GetBenefitsForEmployee_ReturnsOkResult()
+    {
+        // Act
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync($"/employees/{_employeeId}/benefits");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        
+        var benefits = await response.Content.ReadFromJsonAsync<IEnumerable<GetEmployeeResponseEmployeeBenefit>>();
+        Assert.Equal(2, benefits.Count());
     }
 }
